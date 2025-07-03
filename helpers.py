@@ -1,5 +1,8 @@
 """
-Helper functions for the Discord bot
+Helper functions for the Discord bot.
+
+This module provides shared utility functions used across different cogs
+for things like creating embeds, formatting time, and cleaning text.
 """
 
 import discord
@@ -9,69 +12,34 @@ from config import BotConfig
 config = BotConfig()
 
 def create_embed(title: str = None, description: str = None, color: int = None) -> discord.Embed:
-    """
-    Create a Discord embed with consistent styling.
-    
-    Args:
-        title: The embed title
-        description: The embed description
-        color: The embed color (defaults to bot's default color)
-    
-    Returns:
-        discord.Embed: Configured embed object
-    """
+    """Create a Discord embed with consistent styling."""
     if color is None:
         color = config.COLORS["default"]
-    
-    embed = discord.Embed(
+    return discord.Embed(
         title=title,
         description=description,
         color=color,
         timestamp=datetime.utcnow()
     )
-    
-    return embed
 
 def format_duration(seconds: int) -> str:
-    """
-    Format seconds into a human-readable duration.
-    
-    Args:
-        seconds: Number of seconds
-    
-    Returns:
-        str: Formatted duration string
-    """
+    """Convert seconds into a human-readable duration string."""
     days = seconds // 86400
     hours = (seconds % 86400) // 3600
     minutes = (seconds % 3600) // 60
     seconds = seconds % 60
-    
+
     parts = []
-    if days:
-        parts.append(f"{days}d")
-    if hours:
-        parts.append(f"{hours}h")
-    if minutes:
-        parts.append(f"{minutes}m")
-    if seconds or not parts:
-        parts.append(f"{seconds}s")
-    
+    if days: parts.append(f"{days}d")
+    if hours: parts.append(f"{hours}h")
+    if minutes: parts.append(f"{minutes}m")
+    if seconds or not parts: parts.append(f"{seconds}s")
     return " ".join(parts)
 
 def format_permissions(permissions: discord.Permissions) -> list:
-    """
-    Format permissions into a readable list.
-    
-    Args:
-        permissions: Discord permissions object
-    
-    Returns:
-        list: List of permission names
-    """
+    """Convert a Discord Permissions object to a readable list of permission names."""
     permission_list = []
-    
-    # Important permissions mapping
+
     perm_mapping = {
         'administrator': 'Administrator',
         'manage_guild': 'Manage Server',
@@ -103,70 +71,39 @@ def format_permissions(permissions: discord.Permissions) -> list:
         'connect': 'Connect to Voice',
         'speak': 'Speak in Voice'
     }
-    
+
     for perm, value in permissions:
         if value and perm in perm_mapping:
             permission_list.append(perm_mapping[perm])
-    
     return permission_list
 
 def truncate_text(text: str, max_length: int = 1024) -> str:
-    """
-    Truncate text to fit within Discord's field limits.
-    
-    Args:
-        text: The text to truncate
-        max_length: Maximum length (default: 1024 for embed fields)
-    
-    Returns:
-        str: Truncated text with ellipsis if needed
-    """
+    """Truncate text to fit within Discord embed field character limits."""
     if len(text) <= max_length:
         return text
-    
     return text[:max_length - 3] + "..."
 
 def get_member_status_emoji(status: discord.Status) -> str:
-    """
-    Get emoji representation of member status.
-    
-    Args:
-        status: Discord status object
-    
-    Returns:
-        str: Status emoji
-    """
+    """Get emoji representation of a member's online status."""
     status_emojis = {
         discord.Status.online: "🟢",
         discord.Status.idle: "🟡",
         discord.Status.dnd: "🔴",
         discord.Status.offline: "⚫"
     }
-    
     return status_emojis.get(status, "❓")
 
 def humanize_timedelta(td) -> str:
-    """
-    Convert timedelta to human-readable format.
-    
-    Args:
-        td: timedelta object
-    
-    Returns:
-        str: Human-readable time difference
-    """
+    """Convert a timedelta object to a human-readable string."""
     days = td.days
     hours, remainder = divmod(td.seconds, 3600)
     minutes, _ = divmod(remainder, 60)
-    
+
     parts = []
-    if days:
-        parts.append(f"{days} day{'s' if days != 1 else ''}")
-    if hours:
-        parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
-    if minutes:
-        parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
-    
+    if days: parts.append(f"{days} day{'s' if days != 1 else ''}")
+    if hours: parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+    if minutes: parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+
     if not parts:
         return "Just now"
     elif len(parts) == 1:
@@ -177,43 +114,19 @@ def humanize_timedelta(td) -> str:
         return f"{parts[0]}, {parts[1]} and {parts[2]}"
 
 def clean_code_block(content: str) -> str:
-    """
-    Remove code block formatting from text.
-    
-    Args:
-        content: Text that might contain code blocks
-    
-    Returns:
-        str: Cleaned text
-    """
-    # Remove ```language and ``` markers
+    """Remove Discord code block formatting from a string."""
     if content.startswith('```') and content.endswith('```'):
         lines = content.split('\n')
-        if len(lines) > 2:
-            return '\n'.join(lines[1:-1])
-        else:
-            return content[3:-3]
-    
-    # Remove single backticks
+        return '\n'.join(lines[1:-1]) if len(lines) > 2 else content[3:-3]
     if content.startswith('`') and content.endswith('`'):
         return content[1:-1]
-    
     return content
 
 def is_valid_hex_color(color: str) -> bool:
-    """
-    Check if a string is a valid hex color.
-    
-    Args:
-        color: Color string to validate
-    
-    Returns:
-        bool: True if valid hex color
-    """
+    """Check if a string is a valid 6-digit hex color (with or without #)."""
     color = color.lstrip('#')
     if len(color) != 6:
         return False
-    
     try:
         int(color, 16)
         return True
