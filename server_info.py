@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime
-from utils.helpers import create_embed
+from helper import create_embed  # ✅ Updated import
 from config import BotConfig
 
 class ServerInfoCog(commands.Cog):
@@ -256,51 +256,4 @@ class ServerInfoCog(commands.Cog):
         roles = sorted(guild.roles[1:], key=lambda r: r.position, reverse=True)  # Exclude @everyone
         
         embed = create_embed(
-            title=f"🎭 {guild.name} Roles",
-            description=f"**Total Roles:** {len(guild.roles)} (including @everyone)",
-            color=self.config.COLORS["info"]
-        )
-        
-        # Split roles into manageable chunks
-        role_chunks = [roles[i:i+20] for i in range(0, len(roles), 20)]
-        
-        for i, chunk in enumerate(role_chunks[:3]):  # Show max 3 chunks (60 roles)
-            role_list = []
-            for role in chunk:
-                member_count = len(role.members)
-                color_indicator = "🎨" if role.color != discord.Color.default() else "⚪"
-                role_list.append(f"{color_indicator} {role.name} ({member_count} members)")
-            
-            field_name = "👑 Highest Roles" if i == 0 else f"📜 Roles (Part {i+1})"
-            embed.add_field(
-                name=field_name,
-                value="\n".join(role_list) if role_list else "No roles",
-                inline=False
-            )
-        
-        if len(roles) > 60:
-            embed.add_field(
-                name="📝 Note",
-                value=f"... and {len(roles) - 60} more roles not shown",
-                inline=False
-            )
-        
-        # Role statistics
-        colored_roles = sum(1 for role in roles if role.color != discord.Color.default())
-        mentionable_roles = sum(1 for role in roles if role.mentionable)
-        hoisted_roles = sum(1 for role in roles if role.hoist)
-        
-        embed.add_field(
-            name="📊 Role Statistics",
-            value=f"**Colored Roles:** {colored_roles}\n"
-                  f"**Mentionable:** {mentionable_roles}\n"
-                  f"**Hoisted:** {hoisted_roles}",
-            inline=True
-        )
-        
-        embed.set_footer(text=f"Requested by {interaction.user}", icon_url=interaction.user.display_avatar.url)
-        
-        await interaction.response.send_message(embed=embed)
-
-async def setup(bot):
-    await bot.add_cog(ServerInfoCog(bot))
+            title=f"🎭 {guild
