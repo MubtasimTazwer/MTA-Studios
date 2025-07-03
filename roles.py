@@ -280,44 +280,12 @@ class RolesCog(commands.Cog):
         
         embed = create_embed(
             title=f"👥 Members with {role.name}",
-            description=f"**{len(members)}** members have this role",
+            description="\n".join([member.mention for member in members[:25]]),
             color=role.color if role.color != discord.Color.default() else self.config.COLORS["info"]
         )
         
-        # Split members into chunks for multiple fields
-        chunk_size = 15
-        member_chunks = [members[i:i + chunk_size] for i in range(0, len(members), chunk_size)]
-        
-        for i, chunk in enumerate(member_chunks[:5]):  # Show max 5 chunks (75 members)
-            member_list = []
-            for member in chunk:
-                status_emoji = {
-                    discord.Status.online: "🟢",
-                    discord.Status.idle: "🟡",
-                    discord.Status.dnd: "🔴",
-                    discord.Status.offline: "⚫"
-                }
-                emoji = status_emoji.get(member.status, "❓")
-                member_list.append(f"{emoji} {member.display_name}")
-            
-            field_name = "Members" if i == 0 else f"Members (continued {i+1})"
-            embed.add_field(
-                name=field_name,
-                value="\n".join(member_list),
-                inline=True
-            )
-        
-        if len(members) > 75:
-            embed.add_field(
-                name="📝 Note",
-                value=f"... and {len(members) - 75} more members not shown",
-                inline=False
-            )
-        
-        embed.set_footer(
-            text=f"Requested by {interaction.user}",
-            icon_url=interaction.user.display_avatar.url
-        )
+        if len(members) > 25:
+            embed.set_footer(text=f"And {len(members) - 25} more...")
         
         await interaction.response.send_message(embed=embed)
 
