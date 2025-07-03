@@ -14,15 +14,15 @@ class DiscordBot(commands.Bot):
     """Main Discord Bot class with all core functionality."""
     
     def __init__(self):
-        # Set up bot intents (using only default intents to avoid privileged intent issues)
+        # Set up bot intents
         intents = discord.Intents.default()
-        # Note: message_content, members, and presences are privileged intents
-        # They need to be enabled in Discord Developer Portal for full functionality
-        
+        # Enable message content if needed for non-slash commands (optional)
+        intents.message_content = True
+
         super().__init__(
             command_prefix=BotConfig.PREFIX,
             intents=intents,
-            help_command=None,  # We'll create our own help command
+            help_command=None,  # Custom help command
             case_insensitive=True,
             strip_after_prefix=True
         )
@@ -32,14 +32,14 @@ class DiscordBot(commands.Bot):
     async def setup_hook(self):
         """Called when the bot is starting up."""
         logger.info("Setting up bot...")
-        
-        # Load all cogs
+
+        # ✅ Load cogs from the same directory
         cogs_to_load = [
-            'cogs.moderation',
-            'cogs.server_info',
-            'cogs.user_info',
-            'cogs.utilities',
-            'cogs.roles'
+            'moderation',
+            'server_info',
+            'user_info',
+            'utilities',
+            'roles'
         ]
         
         for cog in cogs_to_load:
@@ -49,7 +49,7 @@ class DiscordBot(commands.Bot):
             except Exception as e:
                 logger.error(f"Failed to load cog {cog}: {e}")
         
-        # Sync slash commands
+        # 🔄 Sync slash commands
         try:
             synced = await self.tree.sync()
             logger.info(f"Synced {len(synced)} slash commands")
@@ -62,7 +62,6 @@ class DiscordBot(commands.Bot):
         logger.info(f"Bot ID: {self.user.id}")
         logger.info(f"Connected to {len(self.guilds)} guilds")
         
-        # Set bot status
         activity = discord.Activity(
             type=discord.ActivityType.watching,
             name=f"{len(self.guilds)} servers | /help"
@@ -72,19 +71,15 @@ class DiscordBot(commands.Bot):
     async def on_guild_join(self, guild):
         """Called when the bot joins a new guild."""
         logger.info(f"Joined guild: {guild.name} (ID: {guild.id})")
-        
-        # Update status with new guild count
-        activity = discord.Activity(
-            type=discord.ActivityType.watching,
-            name=f"{len(self.guilds)} servers | /help"
-        )
-        await self.change_presence(activity=activity, status=discord.Status.online)
+        await self.update_status()
     
     async def on_guild_remove(self, guild):
         """Called when the bot is removed from a guild."""
         logger.info(f"Left guild: {guild.name} (ID: {guild.id})")
-        
-        # Update status with new guild count
+        await self.update_status()
+
+    async def update_status(self):
+        """Update bot presence based on server count."""
         activity = discord.Activity(
             type=discord.ActivityType.watching,
             name=f"{len(self.guilds)} servers | /help"
@@ -92,7 +87,7 @@ class DiscordBot(commands.Bot):
         await self.change_presence(activity=activity, status=discord.Status.online)
     
     async def on_command_error(self, ctx, error):
-        """Global error handler for traditional commands."""
+        """Global error handler for prefix commands."""
         if isinstance(error, commands.CommandNotFound):
             return  # Ignore unknown commands
         
@@ -111,14 +106,14 @@ class DiscordBot(commands.Bot):
         """Global error handler for slash commands."""
         logger.error(f"Slash command error: {error}")
         
-        if interaction.response.is_done():
-            send_func = interaction.followup.send
-        else:
-            send_func = interaction.response.send_message
-        
+        send_func = (
+            interaction.followup.send if interaction.response.is_done()
+            else interaction.response.send_message
+        )
+
         if isinstance(error, discord.app_commands.MissingPermissions):
             await send_func("❌ You don't have permission to use this command.", ephemeral=True)
         elif isinstance(error, discord.app_commands.CommandOnCooldown):
-            await send_func(f"⏰ Command is on cooldown. Try again in {error.retry_after:.1f} seconds.", ephemeral=True)
+            await send_func(f"⏰ Cooldown active. Try again in {error.retry_after:.1f} seconds.", ephemeral=True)
         else:
             await send_func("❌ An error occurred while executing this command.", ephemeral=True)
