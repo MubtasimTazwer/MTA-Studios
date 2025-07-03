@@ -10,7 +10,16 @@ import aiohttp
 import json
 import requests
 from datetime import datetime, timedelta
-from utils.helpers import create_embed
+# from utils.helpers import create_embed
+
+def create_embed(title=None, description=None, color=discord.Color.blue()):
+    embed = discord.Embed(
+        title=title or "Information",
+        description=description or "",
+        color=color
+    )
+    return embed
+
 from config import BotConfig
 
 
