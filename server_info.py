@@ -256,4 +256,4 @@ class ServerInfoCog(commands.Cog):
         roles = sorted(guild.roles[1:], key=lambda r: r.position, reverse=True)  # Exclude @everyone
         
         embed = create_embed(
-            title=f"🎭 {guild
+            title=f"🎭 {guild}
