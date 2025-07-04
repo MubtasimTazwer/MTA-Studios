@@ -53,7 +53,8 @@ class ModerationCog(commands.Cog):
                 dm_embed = create_embed(
                     title="You have been kicked",
                     description=f"You were kicked from **{interaction.guild.name}**",
-                    color=self.config.COLORS["warning"]
+                    color=discord.Color.orange()
+
                 )
                 dm_embed.add_field(name="Reason", value=reason, inline=False)
                 dm_embed.add_field(name="Kicked by", value=interaction.user.mention, inline=True)
