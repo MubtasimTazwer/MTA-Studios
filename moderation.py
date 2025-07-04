@@ -54,7 +54,6 @@ class ModerationCog(commands.Cog):
                     title="You have been kicked",
                     description=f"You were kicked from **{interaction.guild.name}**",
                     color=discord.Color.orange()
-
                 )
                 dm_embed.add_field(name="Reason", value=reason, inline=False)
                 dm_embed.add_field(name="Kicked by", value=interaction.user.mention, inline=True)
@@ -249,9 +248,10 @@ class ModerationCog(commands.Cog):
             await member.timeout(timeout_until, reason=f"{reason} - Timed out by {interaction.user}")
             
             embed = create_embed(
-                title="Member Timed Out",
-                description=f"**{member}** has been timed out",
-                color=self.config.COLORS["warning"]
+    title="Member Timed Out",
+    description=f"**{member}** has been timed out",
+    color=discord.Color.orange()
+)
             )
             embed.add_field(name="Duration", value=f"{duration} minutes", inline=True)
             embed.add_field(name="Reason", value=reason, inline=False)
