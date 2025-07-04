@@ -7,10 +7,10 @@ import yt_dlp
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.voice_clients = {}
 
-    @app_commands.command(name="play", description="Play a YouTube song in your voice channel.")
-    async def play(self, interaction: discord.Interaction, url: str):
+    @app_commands.command(name="play", description="Play a song by name or URL.")
+    @app_commands.describe(query="Song name or YouTube URL")
+    async def play(self, interaction: discord.Interaction, query: str):
         await interaction.response.defer()
 
         if not interaction.user.voice or not interaction.user.voice.channel:
@@ -27,23 +27,25 @@ class Music(commands.Cog):
         else:
             vc = await voice_channel.connect()
 
-        # Use yt_dlp to extract audio
+        # yt_dlp options with search
         ydl_opts = {
             'format': 'bestaudio/best',
             'quiet': True,
-            'extract_flat': False,
             'noplaylist': True,
+            'default_search': 'ytsearch1',
         }
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url, download=False)
+                info = ydl.extract_info(query, download=False)
+                if 'entries' in info:
+                    info = info['entries'][0]  # Get first search result
+
                 audio_url = info['url']
                 title = info.get('title', 'Unknown Title')
 
             vc.stop()
             vc.play(discord.FFmpegPCMAudio(audio_url), after=lambda e: print(f"[Music] Finished: {e}"))
-
             await interaction.followup.send(f"🎶 Now playing: **{title}**")
 
         except Exception as e:
