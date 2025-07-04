@@ -252,7 +252,6 @@ class ModerationCog(commands.Cog):
     description=f"**{member}** has been timed out",
     color=discord.Color.orange()
 )
-            )
             embed.add_field(name="Duration", value=f"{duration} minutes", inline=True)
             embed.add_field(name="Reason", value=reason, inline=False)
             embed.add_field(name="Timed out by", value=interaction.user.mention, inline=True)
