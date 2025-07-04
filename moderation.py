@@ -264,4 +264,4 @@ class ModerationCog(commands.Cog):
             await interaction.response.send_message(f"â An error occurred: {str(e)}", ephemeral=True)
 
 async def setup(bot):
-    await bot.add_cog(ModerationCog(bot)
+    await bot.add_cog(ModerationCog(bot))
