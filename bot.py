@@ -39,8 +39,7 @@ class DiscordBot(commands.Bot):
             'server_info',
             'user_info',
             'utilities',
-            'roles',
-            'music'
+            'roles'
         ]
         
         for cog in cogs_to_load:
