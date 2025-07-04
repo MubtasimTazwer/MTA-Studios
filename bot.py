@@ -39,7 +39,7 @@ class DiscordBot(commands.Bot):
             'server_info',
             'user_info',
             'utilities',
-            'roles'
+            'roles',
             'music'
         ]
         
